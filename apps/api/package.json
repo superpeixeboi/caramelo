@@ -1,0 +1,32 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "docker compose up -d && node scripts/wait-for-mongo.js",
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@koa/bodyparser": "^5.0.0",
+    "@koa/cors": "^5.0.0",
+    "@koa/router": "^15.0.0",
+    "ajv": "^8.17.0",
+    "dotenv": "^16.4.0",
+    "koa": "^2.15.0",
+    "mongodb": "^6.12.0",
+    "nanoid": "^5.1.0"
+  },
+  "devDependencies": {
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.4.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write"
+    ]
+  }
+}

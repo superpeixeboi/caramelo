@@ -1,0 +1,14 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: caramelo-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: caramelo
+      MONGO_INITDB_ROOT_PASSWORD: caramelo
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

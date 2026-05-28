@@ -1,0 +1,20 @@
+{
+  "name": "caramelo",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "prettier": "^3.7.4",
+    "turbo": "^2.9.14"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "npm@11.8.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
