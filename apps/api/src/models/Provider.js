@@ -1,4 +1,4 @@
-import { MongoModel } from './_MongoModel.js'
+import { MongoModel } from '../db/MongoModel.js'
 
 export class Provider extends MongoModel {
   static collectionName = 'providers'

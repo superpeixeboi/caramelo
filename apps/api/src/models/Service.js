@@ -1,4 +1,4 @@
-import { MongoModel } from './_MongoModel.js'
+import { MongoModel } from '../db/MongoModel.js'
 import { SERVICE_STATUS_VALUES } from '@caramelo/enums'
 
 export class Service extends MongoModel {

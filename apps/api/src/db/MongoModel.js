@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
 import Ajv from 'ajv'
-import { getDb } from '../db/mongo.js'
+import { getDb } from './mongo.js'
 import { ValidationError } from '../lib/errors/ValidationError.js'
 import { NotFoundError } from '../lib/errors/NotFoundError.js'
 

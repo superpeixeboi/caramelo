@@ -6,6 +6,12 @@ export const WEEKDAYS = Object.freeze({
   THURSDAY: Object.freeze({ value: 'thursday', order: 4 }),
   FRIDAY: Object.freeze({ value: 'friday', order: 5 }),
   SATURDAY: Object.freeze({ value: 'saturday', order: 6 }),
+  fromDate: function (date){
+    if (date && date instanceof Date) {
+      const dayOrder = date.getDay()
+      return Object.values(this).find(day => day.order === dayOrder)
+    }
+  }
 })
 
 export const WEEKDAYS_VALUES = Object.freeze(
