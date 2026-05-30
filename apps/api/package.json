@@ -7,6 +7,8 @@
     "predev": "docker compose up -d && node scripts/wait-for-mongo.js",
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepare": "husky"
   },
   "dependencies": {
@@ -22,7 +24,8 @@
   "devDependencies": {
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",
-    "prettier": "^3.4.0"
+    "prettier": "^3.4.0",
+    "vitest": "^4.1.7"
   },
   "lint-staged": {
     "*.js": [

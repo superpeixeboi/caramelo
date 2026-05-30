@@ -1,5 +1,5 @@
 import { NotFoundError } from "../lib/errors/NotFoundError.js"
-import { qsToMongo } from "../lib/qsToMongo.js"
+import { qsToMongo } from "../db/qsToMongo.js"
 import { Place } from "../models/Place.js"
 
 export const fetchPlace = async (id, ctx, next) => {
@@ -8,7 +8,7 @@ export const fetchPlace = async (id, ctx, next) => {
   await next()
 }
 
-export const findPlace = async (ctx) => {
+export const findPlace = async (ctx, next) => {
   const query = qsToMongo(ctx.query, Place.schema)
   ctx.state.result = await Place.find({ ...query, customerId: ctx.params.customerId })
   await next()

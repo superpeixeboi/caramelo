@@ -1,4 +1,4 @@
-import { ValidationError } from './errors/ValidationError.js'
+import { ValidationError } from '../lib/errors/ValidationError.js'
 
 const OPERATORS = ['__gte', '__lte', '__gt', '__lt', '__ne', '__like']
 const DISALLOWED_OPERATORS_ON = {

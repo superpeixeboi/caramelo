@@ -4,6 +4,7 @@ import {
   createTicket,
   fetchTicket,
   findTicket,
+  getTicket,
   patchTicket,
 } from '../middleware/ticketMiddleware.js'
 
@@ -13,7 +14,7 @@ router.param('ticketId', fetchTicket)
 
 router.get('/tickets', findTicket)
 router.post('/tickets', createTicket)
-router.get('/tickets/:ticketId', fetchTicket)
+router.get('/tickets/:ticketId', getTicket)
 router.patch('/tickets/:ticketId', patchTicket)
 
 export const ticketRouter = router

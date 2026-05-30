@@ -1,5 +1,5 @@
 import { NotFoundError } from '../lib/errors/NotFoundError.js'
-import { qsToMongo } from '../lib/qsToMongo.js'
+import { qsToMongo } from '../db/qsToMongo.js'
 import { Ticket } from '../models/Ticket.js'
 
 export const fetchTicket = async (id, ctx, next) => {
@@ -16,6 +16,11 @@ export const findTicket = async (ctx, next) => {
 export const createTicket = async (ctx, next) => {
   ctx.status = 201
   ctx.state.result = await Ticket.create(ctx.request.body)
+  await next()
+}
+
+export const getTicket = async (ctx, next) => {
+  ctx.state.result = ctx.state.ticket
   await next()
 }
 

@@ -1,5 +1,5 @@
 import { NotFoundError } from "../lib/errors/NotFoundError.js"
-import { qsToMongo } from "../lib/qsToMongo.js"
+import { qsToMongo } from "../db/qsToMongo.js"
 import { Service } from "../models/Service.js"
 
 export const fetchService = async (id, ctx, next) => {
