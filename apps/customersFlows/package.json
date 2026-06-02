@@ -5,9 +5,14 @@
   "type": "module",
   "main": "src/handler.js",
   "scripts": {
-    "start": "node src/handler.js"
+    "start": "node src/handler.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.8"
   }
 }

@@ -8,9 +8,9 @@ export class Ticket extends MongoModel {
     type: 'object',
     properties: {
       phone: { type: 'string' },
-      flow: { type: 'string', enum: TICKET_FLOW_VALUES },
+      flowId: { type: 'string', enum: TICKET_FLOW_VALUES },
       status: { type: 'string', enum: TICKET_STATUS_VALUES },
-      context: { type: 'object' },
+      data: { type: 'object' },
       currentStepIndex: { type: 'integer', minimum: 0 },
       steps: {
         type: 'array',
@@ -20,13 +20,12 @@ export class Ticket extends MongoModel {
             stepId: { type: 'string' },
             prompt: { type: 'string' },
             response: { type: 'string' },
-            data: { type: 'object' },
-            status: { type: 'string', enum: TICKET_STEP_STATUS_VALUES },
+            data: { type: 'object' }
           },
-          required: ['stepId', 'status'],
+          required: ['stepId', 'prompt', 'response'],
         },
       },
     },
-    required: ['phone', 'flow', 'status', 'currentStepIndex', 'steps'],
+    required: ['phone', 'flowId', 'status', 'currentStepIndex', 'steps'],
   }
 }

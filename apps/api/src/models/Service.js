@@ -9,12 +9,13 @@ export class Service extends MongoModel {
     properties: {
       placeId: { type: 'string' },
       customerId: { type: 'string' },
+      data: { type: 'datetime' },
       name: { type: 'string' },
       description: { type: 'string' },
       price: { type: 'number' },
       providerId: { type: 'string' },
       status: { type: 'string', enum: SERVICE_STATUS_VALUES },
     },
-    required: ['placeId', 'customerId', 'name'],
+    required: ['placeId', 'customerId', 'date'],
   }
 }

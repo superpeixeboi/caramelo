@@ -1,4 +1,5 @@
 export const TICKET_STATUS = Object.freeze({
+  CREATING: Object.freeze({ value: 'creating' }),
   OPEN: Object.freeze({ value: 'open' }),
   CLOSED: Object.freeze({ value: 'closed' }),
 })

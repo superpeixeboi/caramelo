@@ -1,44 +1,31 @@
-import { SERVICE_REQUEST } from './flows/serviceRequest.js'
+import { serviceRequestFlow } from './flows/serviceRequest/serviceRequestFlow.js'
 import { getTicket, createTicket, patchTicket, findCustomerByPhone } from './api.js'
 import { sendMessage } from './whatsapp.js'
 
-const FLOWS = {
-  'service-request': SERVICE_REQUEST,
-}
+export async function handleMessage(input, phone) {
+  const customer = await findCustomerByPhone(phone)
+  if (!customer) {
+    return sendMessage(phone, 'Você ainda não possui cadastro. Acesse caramelo.com/register')
+  }
 
-export async function handleMessage(text, phone) {
-  let ticket = await getTicket(phone)
-
+  const ticket = await getTicket(phone)
   if (!ticket) {
-    ticket = await startNewFlow(phone, 'service-request', text)
-    return
+    return startNewFlow(phone, serviceRequestFlow, customer)
   }
 
-  await resolveCurrentStep(ticket, text)
+  return resolveCurrentStep(ticket, input, serviceRequestFlow, customer)
 }
 
-async function startNewFlow(phone, flowKey, initialText) {
-  const flow = FLOWS[flowKey]
-  if (!flow) {
-    console.error(`Unknown flow: ${flowKey}`)
-    return
-  }
-
-  const steps = flow.steps.map((step, i) => ({
-    stepId: step.id,
-    prompt: i === 0 ? step.getPrompt(null) : '',
-    response: '',
-    data: null,
-    status: i === 0 ? 'pending' : 'pending',
-  }))
-
+async function startNewFlow(phone, flow, customer) {
+  const data = {}
+  
   const ticket = await createTicket({
     phone,
-    flow: flowKey,
+    flowId: flow.flowId,
     status: 'open',
-    context: {},
+    data: {},
     currentStepIndex: 0,
-    steps,
+    steps: []
   })
 
   if (!ticket) {
@@ -46,84 +33,35 @@ async function startNewFlow(phone, flowKey, initialText) {
     return
   }
 
-  if (flow.steps[0].type === 'text' && flow.steps[0].requiresCustomer) {
-    const customer = await findCustomerByPhone(phone)
-    if (!customer) {
-      await sendMessage(phone, 'Você ainda não possui cadastro. Acesse caramelo.com/register')
-      await patchTicket(ticket._id, { status: 'closed' })
-      return
-    }
-    ticket.context.customer = customer
-  }
-
-  const prompt = flow.steps[0].getPrompt(ticket.context)
-  await sendMessage(phone, prompt)
-
-  const updatedSteps = [...ticket.steps]
-  updatedSteps[0] = { ...updatedSteps[0], prompt }
-  await patchTicket(ticket._id, { steps: updatedSteps })
+  const FirstStep = flow.steps[0]
+  const prompt = await new FirstStep({ customer, data }).prompt()
+  return sendMessage(phone, prompt)
 }
 
-async function resolveCurrentStep(ticket, text) {
-  const flow = FLOWS[ticket.flow]
-  if (!flow) {
-    console.error(`Unknown flow for ticket: ${ticket.flow}`)
-    return
-  }
-
+async function resolveCurrentStep(ticket, input, flow, customer) {
   const stepIdx = ticket.currentStepIndex
-  const stepDef = flow.steps[stepIdx]
-  if (!stepDef) {
-    console.error(`No step definition for index ${stepIdx}`)
-    return
+  const nextStepIdx = stepIdx + 1
+  const CurrStep = flow.steps[stepIdx]
+  let step
+  try {
+    const currStep = new CurrStep({ customer, data: ticket.data })
+    step = await currStep.run(input)
+  } catch (error) {
+    return sendMessage(ticket.phone, error)
   }
 
-  const valid = stepDef.validate(text, ticket.context)
-  if (!valid) {
-    const errorMsg = stepDef.getErrorPrompt?.(ticket.context) || 'Resposta inválida. Tente novamente.'
-    await sendMessage(ticket.phone, errorMsg)
-    return
+  const steps = [ ...ticket.steps, step ]
+  const data = { ...ticket.data, ...step.data }
+  const status = flow.steps[nextStepIdx] ? 'open' : 'closed'
+  await patchTicket(ticket._id, { currentStepIndex: nextStepIdx, data, steps, status })
+
+  if (status === 'open') {
+    const NextStep = flow.steps[nextStepIdx]
+    const nextStep = new NextStep({ customer, data })
+    const prompt = await nextStep.prompt()
+    return sendMessage(ticket.phone, prompt)
+  } else {
+    const prompt = await flow.onComplete(data)
+    return sendMessage(ticket.phone, prompt)
   }
-
-  const parsed = stepDef.parse(text, ticket.context)
-  const updatedSteps = [...ticket.steps]
-  updatedSteps[stepIdx] = {
-    ...updatedSteps[stepIdx],
-    response: text,
-    data: parsed,
-    status: 'completed',
-  }
-
-  const newContext = { ...ticket.context, ...parsed }
-  const nextIdx = stepIdx + 1
-
-  if (nextIdx >= flow.steps.length) {
-    await flow.onComplete(newContext, ticket.phone)
-    updatedSteps[stepIdx] = { ...updatedSteps[stepIdx], response: text, data: parsed, status: 'completed' }
-    await patchTicket(ticket._id, { steps: updatedSteps, context: newContext, status: 'closed' })
-    return
-  }
-
-  const nextStep = flow.steps[nextIdx]
-
-  if (nextStep.requiresCustomer && !newContext.customer) {
-    const customer = await findCustomerByPhone(ticket.phone)
-    if (!customer) {
-      await sendMessage(ticket.phone, 'Você ainda não possui cadastro. Acesse caramelo.com/register')
-      await patchTicket(ticket._id, { steps: updatedSteps, context: newContext, status: 'closed' })
-      return
-    }
-    newContext.customer = customer
-  }
-
-  const prompt = nextStep.getPrompt(newContext)
-  updatedSteps[nextIdx] = { ...updatedSteps[nextIdx], prompt, status: 'pending' }
-
-  await patchTicket(ticket._id, {
-    steps: updatedSteps,
-    context: newContext,
-    currentStepIndex: nextIdx,
-  })
-
-  await sendMessage(ticket.phone, prompt)
 }
